@@ -16,12 +16,19 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable long userId) {
-        return ResponseEntity.ok(userService.getUser(userId));
+    public ResponseEntity<UserResponse> getUser(
+            @PathVariable long userId
+    ) {
+        UserResponse data = userService.getUser(userId);
+        return ResponseEntity
+                .ok(data);
     }
 
     @PutMapping("/users")
-    public void changePassword(@Auth AuthUser authUser, @RequestBody UserChangePasswordRequest userChangePasswordRequest) {
+    public void changePassword(
+            @Auth AuthUser authUser,
+            @RequestBody UserChangePasswordRequest userChangePasswordRequest
+    ) {
         userService.changePassword(authUser.getId(), userChangePasswordRequest);
     }
 }

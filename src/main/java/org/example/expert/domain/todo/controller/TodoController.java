@@ -23,7 +23,9 @@ public class TodoController {
             @Auth AuthUser authUser,
             @Valid @RequestBody TodoSaveRequest todoSaveRequest
     ) {
-        return ResponseEntity.ok(todoService.saveTodo(authUser, todoSaveRequest));
+        TodoSaveResponse data = todoService.saveTodo(authUser, todoSaveRequest);
+        return ResponseEntity
+                .ok(data);
     }
 
     @GetMapping("/todos")
@@ -31,11 +33,17 @@ public class TodoController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return ResponseEntity.ok(todoService.getTodos(page, size));
+        Page<TodoResponse> data = todoService.getTodos(page, size);
+        return ResponseEntity
+                .ok(data);
     }
 
     @GetMapping("/todos/{todoId}")
-    public ResponseEntity<TodoResponse> getTodo(@PathVariable long todoId) {
-        return ResponseEntity.ok(todoService.getTodo(todoId));
+    public ResponseEntity<TodoResponse> getTodo(
+            @PathVariable long todoId
+    ) {
+        TodoResponse data = todoService.getTodo(todoId);
+        return ResponseEntity
+                .ok(data);
     }
 }

@@ -25,11 +25,17 @@ public class CommentController {
             @PathVariable long todoId,
             @Valid @RequestBody CommentSaveRequest commentSaveRequest
     ) {
-        return ResponseEntity.ok(commentService.saveComment(authUser, todoId, commentSaveRequest));
+        CommentSaveResponse data = commentService.saveComment(authUser, todoId, commentSaveRequest);
+        return ResponseEntity
+                .ok(data);
     }
 
     @GetMapping("/todos/{todoId}/comments")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable long todoId) {
-        return ResponseEntity.ok(commentService.getComments(todoId));
+    public ResponseEntity<List<CommentResponse>> getComments(
+            @PathVariable long todoId
+    ) {
+        List<CommentResponse> data = commentService.getComments(todoId);
+        return ResponseEntity
+                .ok(data);
     }
 }
