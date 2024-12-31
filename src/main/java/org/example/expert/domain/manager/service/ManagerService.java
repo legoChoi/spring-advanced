@@ -33,7 +33,6 @@ public class ManagerService {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
 
-        // 일정을 만든 유저
         User user = User.fromAuthUser(authUser);
 
         if (!ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
