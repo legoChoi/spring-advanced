@@ -14,12 +14,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/todos")
 @RequiredArgsConstructor
 public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping("/todos/{todoId}/comments")
+    @PostMapping("/{todoId}/comments")
     public ResponseEntity<CommentSaveResponse> saveComment(
             @Auth AuthUser authUser,
             @PathVariable long todoId,
@@ -30,7 +31,7 @@ public class CommentController {
                 .ok(data);
     }
 
-    @GetMapping("/todos/{todoId}/comments")
+    @GetMapping("/{todoId}/comments")
     public ResponseEntity<List<CommentResponse>> getComments(
             @PathVariable long todoId
     ) {

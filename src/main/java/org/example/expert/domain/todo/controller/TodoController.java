@@ -13,12 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/todos")
 @RequiredArgsConstructor
 public class TodoController {
 
     private final TodoService todoService;
 
-    @PostMapping("/todos")
+    @PostMapping
     public ResponseEntity<TodoSaveResponse> saveTodo(
             @Auth AuthUser authUser,
             @Valid @RequestBody TodoSaveRequest todoSaveRequest
@@ -28,7 +29,7 @@ public class TodoController {
                 .ok(data);
     }
 
-    @GetMapping("/todos")
+    @GetMapping
     public ResponseEntity<Page<TodoResponse>> getTodos(
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
@@ -38,7 +39,7 @@ public class TodoController {
                 .ok(data);
     }
 
-    @GetMapping("/todos/{todoId}")
+    @GetMapping("/{todoId}")
     public ResponseEntity<TodoResponse> getTodo(
             @PathVariable long todoId
     ) {
