@@ -26,36 +26,43 @@ public class AuthService {
 
     @Transactional
     public SignupResponse signup(SignupRequest signupRequest) {
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            throw new InvalidRequestException("이미 존재하는 이메일입니다.");
-        }
+        validateAlreadyExistsUserEmail(signupRequest.getEmail());
 
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
-
         UserRole userRole = UserRole.of(signupRequest.getUserRole());
+        User newUser = User.createUser(signupRequest.getEmail(), encodedPassword, userRole);
 
-        User newUser = new User(
-                signupRequest.getEmail(),
-                encodedPassword,
-                userRole
-        );
         User savedUser = userRepository.save(newUser);
 
-        String bearerToken = jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), userRole);
+        String bearerToken = jwtUtil.createToken(savedUser.getId(), savedUser.getEmail(), savedUser.getUserRole());
 
         return new SignupResponse(bearerToken);
     }
 
     public SigninResponse signin(SigninRequest signinRequest) {
-        User user = userRepository.findByEmail(signinRequest.getEmail()).orElseThrow(
-                () -> new InvalidRequestException("가입되지 않은 유저입니다."));
+        User user = getUserByEmail(signinRequest.getEmail());
 
-        if (!passwordEncoder.matches(signinRequest.getPassword(), user.getPassword())) {
-            throw new AuthException("잘못된 비밀번호입니다.");
-        }
+        validateUserPassword(signinRequest.getPassword(), user.getPassword());
 
         String bearerToken = jwtUtil.createToken(user.getId(), user.getEmail(), user.getUserRole());
 
         return new SigninResponse(bearerToken);
+    }
+
+    private void validateAlreadyExistsUserEmail(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new InvalidRequestException("이미 존재하는 이메일입니다.");
+        }
+    }
+
+    private User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElseThrow(
+                () -> new InvalidRequestException("가입되지 않은 유저입니다."));
+    }
+
+    private void validateUserPassword(String plainPassword, String encodedPassword) {
+        if (!passwordEncoder.matches(plainPassword, encodedPassword)) {
+            throw new AuthException("잘못된 비밀번호입니다.");
+        }
     }
 }
