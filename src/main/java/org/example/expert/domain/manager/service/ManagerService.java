@@ -2,6 +2,8 @@ package org.example.expert.domain.manager.service;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
@@ -35,7 +37,7 @@ public class ManagerService {
 
         User user = User.fromAuthUser(authUser);
 
-        if (!ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
+        if (todo.getUser() == null || !ObjectUtils.nullSafeEquals(user.getId(), todo.getUser().getId())) {
             throw new InvalidRequestException("담당자를 등록하려고 하는 유저가 일정을 만든 유저가 유효하지 않습니다.");
         }
 
