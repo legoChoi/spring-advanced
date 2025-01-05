@@ -1,8 +1,8 @@
 package org.example.expert.domain.comment.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.example.expert.domain.comment.dto.CommentMapper;
 import org.example.expert.domain.comment.dto.request.CommentSaveRequest;
 import org.example.expert.domain.comment.dto.response.CommentResponse;
 import org.example.expert.domain.comment.dto.response.CommentSaveResponse;
@@ -12,7 +12,6 @@ import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
-import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,39 +26,21 @@ public class CommentService {
 
     @Transactional
     public CommentSaveResponse saveComment(AuthUser authUser, long todoId, CommentSaveRequest commentSaveRequest) {
-        Todo todo = todoRepository.findById(todoId).orElseThrow(() ->
-                new InvalidRequestException("Todo not found"));
-
+        Todo todo = getTodoById(todoId);
         User user = User.fromAuthUser(authUser);
 
-        Comment newComment = new Comment(
-                commentSaveRequest.getContents(),
-                user,
-                todo
-        );
-
+        Comment newComment = CommentMapper.toEntity(commentSaveRequest, user, todo);
         Comment savedComment = commentRepository.save(newComment);
-
-        return new CommentSaveResponse(
-                savedComment.getId(),
-                savedComment.getContents(),
-                new UserResponse(user.getId(), user.getEmail())
-        );
+        return CommentMapper.toCommentSaveResponse(savedComment);
     }
 
     public List<CommentResponse> getComments(long todoId) {
         List<Comment> commentList = commentRepository.findAllByTodoId(todoId);
+        return commentList.stream().map(CommentMapper::toCommentResponse).toList();
+    }
 
-        List<CommentResponse> dtoList = new ArrayList<>();
-        for (Comment comment : commentList) {
-            User user = comment.getUser();
-            CommentResponse dto = new CommentResponse(
-                    comment.getId(),
-                    comment.getContents(),
-                    new UserResponse(user.getId(), user.getEmail())
-            );
-            dtoList.add(dto);
-        }
-        return dtoList;
+    private Todo getTodoById(long todoId) {
+        return todoRepository.findById(todoId).orElseThrow(() ->
+                new InvalidRequestException("Todo not found"));
     }
 }
