@@ -6,6 +6,9 @@ import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
+import org.example.expert.domain.user.exception.UserNotFoundException;
+import org.example.expert.domain.user.exception.UserPasswordMismatchException;
+import org.example.expert.domain.user.exception.UserSamePasswordException;
 import org.example.expert.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,18 +37,19 @@ public class UserService {
     }
 
     private User getUserById(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new InvalidRequestException("User not found"));
+        return userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
     }
 
     private void validateSamePassword(String newPassword, String currentPassword) {
         if (passwordEncoder.matches(newPassword, currentPassword)) {
-            throw new InvalidRequestException("새 비밀번호는 기존 비밀번호와 같을 수 없습니다.");
+            throw new UserSamePasswordException();
         }
     }
 
     private void validatePassword(String plainPassword, String encodedPassword) {
         if (!passwordEncoder.matches(plainPassword, encodedPassword)) {
-            throw new InvalidRequestException("잘못된 비밀번호입니다.");
+            throw new UserPasswordMismatchException();
         }
     }
 }

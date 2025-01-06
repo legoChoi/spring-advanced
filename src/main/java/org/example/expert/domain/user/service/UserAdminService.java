@@ -5,6 +5,7 @@ import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.user.dto.request.UserRoleChangeRequest;
 import org.example.expert.domain.user.entity.User;
 import org.example.expert.domain.user.enums.UserRole;
+import org.example.expert.domain.user.exception.UserNotFoundException;
 import org.example.expert.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,12 @@ public class UserAdminService {
 
     @Transactional
     public void changeUserRole(long userId, UserRoleChangeRequest userRoleChangeRequest) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new InvalidRequestException("User not found"));
+        User user = getUserById(userId);
         user.updateRole(UserRole.of(userRoleChangeRequest.getRole()));
+    }
+
+    private User getUserById(long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(UserNotFoundException::new);
     }
 }
