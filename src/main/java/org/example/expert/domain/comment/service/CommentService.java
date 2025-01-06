@@ -28,7 +28,6 @@ public class CommentService {
     public CommentSaveResponse saveComment(AuthUser authUser, long todoId, CommentSaveRequest commentSaveRequest) {
         Todo todo = todoService.getTodoById(todoId);
         User user = User.fromAuthUser(authUser);
-
         Comment newComment = CommentMapper.toEntity(commentSaveRequest, user, todo);
         Comment savedComment = commentRepository.save(newComment);
         return CommentMapper.toCommentSaveResponse(savedComment);

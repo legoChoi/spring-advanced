@@ -3,9 +3,8 @@ package org.example.expert.aop.log;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
@@ -15,7 +14,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.util.ContentCachingRequestWrapper;
-import org.springframework.web.util.ContentCachingResponseWrapper;
 
 import java.io.IOException;
 import java.util.logging.Logger;
@@ -41,10 +39,10 @@ public class AspectAdminLogger {
         buildLog("---->", adminLog);
     }
 
-    @After("inAdminControllers()")
-    public void logAdminControllerAfter() throws IOException {
+    @AfterReturning(value = "inAdminControllers()", returning = "response")
+    public void logAdminControllerAfter(Object response) throws IOException {
         AdminLog adminLog = createAdminLog();
-        String body = getResponseBody();
+        String body = getResponseBody(response);
         adminLog.setBody(body);
 
         buildLog("<----", adminLog);
@@ -73,9 +71,8 @@ public class AspectAdminLogger {
     }
 
     // TODO : response 값 읽기
-    private String getResponseBody() throws IOException {
-        ContentCachingResponseWrapper wrapper = (ContentCachingResponseWrapper) getServletResponse();
-        return objectMapper.readTree(wrapper.getContentAsByteArray()).toString();
+    private String getResponseBody(Object response) throws IOException {
+        return objectMapper.writeValueAsString(response);
     }
 
     /**
@@ -106,10 +103,5 @@ public class AspectAdminLogger {
     private HttpServletRequest getServletRequest() {
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
         return attributes.getRequest();
-    }
-
-    private HttpServletResponse getServletResponse() {
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes();
-        return attributes.getResponse();
     }
 }
