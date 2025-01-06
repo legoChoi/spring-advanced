@@ -36,7 +36,7 @@ public class UserService {
         user.changePassword(encodedPassword);
     }
 
-    private User getUserById(long userId) {
+    public User getUserById(long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
     }
