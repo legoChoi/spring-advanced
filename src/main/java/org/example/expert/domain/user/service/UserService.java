@@ -2,7 +2,6 @@ package org.example.expert.domain.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.expert.config.PasswordEncoder;
-import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.user.dto.request.UserChangePasswordRequest;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
@@ -29,8 +28,9 @@ public class UserService {
     @Transactional
     public void changePassword(long userId, UserChangePasswordRequest userChangePasswordRequest) {
         User user = getUserById(userId);
-        validateSamePassword(userChangePasswordRequest.getNewPassword(), user.getPassword());
-        validatePassword(userChangePasswordRequest.getOldPassword(), user.getPassword());
+
+        validateIsSamePassword(userChangePasswordRequest.getNewPassword(), user.getPassword());
+        validatePasswordMatch(userChangePasswordRequest.getOldPassword(), user.getPassword());
 
         String encodedPassword = passwordEncoder.encode(userChangePasswordRequest.getNewPassword());
         user.changePassword(encodedPassword);
@@ -41,13 +41,13 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    private void validateSamePassword(String newPassword, String currentPassword) {
+    private void validateIsSamePassword(String newPassword, String currentPassword) {
         if (passwordEncoder.matches(newPassword, currentPassword)) {
             throw new UserSamePasswordException();
         }
     }
 
-    private void validatePassword(String plainPassword, String encodedPassword) {
+    private void validatePasswordMatch(String plainPassword, String encodedPassword) {
         if (!passwordEncoder.matches(plainPassword, encodedPassword)) {
             throw new UserPasswordMismatchException();
         }
