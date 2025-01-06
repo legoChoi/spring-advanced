@@ -34,23 +34,26 @@ public class AspectAdminLogger {
 
     @Before("inAdminControllers()")
     public void logAdminControllerBefore() throws IOException {
-        AdminLog context = createLogContext();
-        String body = getRequestBody(context.getMethod());
-        context.setBody(body);
+        AdminLog adminLog = createAdminLog();
+        String body = getRequestBody(adminLog.getMethod());
+        adminLog.setBody(body);
 
-        buildLog("---->", context);
+        buildLog("---->", adminLog);
     }
 
     @After("inAdminControllers()")
     public void logAdminControllerAfter() throws IOException {
-        AdminLog context = createLogContext();
+        AdminLog adminLog = createAdminLog();
         String body = getResponseBody();
-        context.setBody(body);
+        adminLog.setBody(body);
 
-        buildLog("<----", context);
+        buildLog("<----", adminLog);
     }
 
-    private AdminLog createLogContext() {
+    /**
+     * create AdminLog DTO
+     */
+    private AdminLog createAdminLog() {
         HttpServletRequest request = getServletRequest();
         String url = request.getRequestURL().toString();
         String method = request.getMethod();
@@ -61,7 +64,7 @@ public class AspectAdminLogger {
     }
 
     private String getRequestBody(String method) throws IOException {
-        if ("GET".equalsIgnoreCase(method)) {
+        if ("GET".equalsIgnoreCase(method)) { // GET 요청에선 request body 읽기 제외
             return null;
         }
 
@@ -69,11 +72,15 @@ public class AspectAdminLogger {
         return objectMapper.readTree(wrapper.getContentAsByteArray()).toString();
     }
 
+    // TODO : response 값 읽기
     private String getResponseBody() throws IOException {
         ContentCachingResponseWrapper wrapper = (ContentCachingResponseWrapper) getServletResponse();
         return objectMapper.readTree(wrapper.getContentAsByteArray()).toString();
     }
 
+    /**
+     * 로그 출력
+     */
     private void buildLog(String tag, AdminLog context) {
         StringBuilder log = new StringBuilder();
         log.append(tag)
