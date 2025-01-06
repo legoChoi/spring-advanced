@@ -48,7 +48,7 @@ public class TodoService {
         return TodoMapper.toTodoResponse(todo);
     }
 
-    private Todo getTodoById(long todoId) {
+    public Todo getTodoById(long todoId) {
         return todoRepository.findById(todoId)
                 .orElseThrow(() -> new InvalidRequestException("Todo not found"));
     }
